@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen — Wadanonolds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #1e1e1e;
+    background: #111;
+  }
+  .topbar a {
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .topbar a:hover { color: #f5a623; }
+  .topbar .title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .badge {
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: #aaa;
+  }
+  .badge strong { color: #f5a623; }
+
+  /* ── Search section ── */
+  .search-section {
+    padding: 40px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .search-row input {
+    flex: 1;
+    padding: 18px 20px;
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #161616;
+    border: 2px solid #2a2a2a;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .search-row input:focus { border-color: #f5a623; }
+  .search-row input::placeholder { color: #333; font-weight: 400; font-size: 18px; }
+
+  .search-row button {
+    padding: 18px 24px;
+    background: #f5a623;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .search-row button:hover { background: #e09512; }
+
+  /* ── Results ── */
+  .results {
+    padding: 10px 24px 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .error-msg {
+    display: none;
+    background: #1e0a0a;
+    border: 1px solid #5a1a1a;
+    border-radius: 12px;
+    padding: 20px 28px;
+    font-size: 16px;
+    color: #ff6b6b;
+    text-align: center;
+    max-width: 460px;
+    width: 100%;
+  }
+
+  .order-card {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 22px 24px;
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: border-color 0.2s;
+  }
+  .order-card:hover { border-color: #333; }
+  .order-card.collected {
+    opacity: 0.4;
+    border-color: #1a2e1a;
+  }
+
+  .order-num {
+    font-size: 36px;
+    font-weight: 900;
+    color: #f5a623;
+    line-height: 1;
+  }
+  .order-item {
+    font-size: 16px;
+    color: #aaa;
+    margin-top: 4px;
+  }
+
+  .collect-btn {
+    padding: 12px 22px;
+    background: #f5a623;
+    color: #000;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .collect-btn:hover { background: #e09512; }
+
+  .collected-tag {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2ecc71;
+    flex-shrink: 0;
+  }
+
+  /* ── Bottom bar ── */
+  .bottombar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #111;
+    border-top: 1px solid #1e1e1e;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .stat .val {
+    font-size: 22px;
+    font-weight: 900;
+    color: #f5a623;
+  }
+  .stat .lbl {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html">← Home</a>
+    <span class="title">Kitchen Counter</span>
+    <span class="badge">Remaining: <strong id="remaining-top">—</strong></span>
+  </div>
+
+  <div class="search-section">
+    <div class="search-label">Enter order number</div>
+    <div class="search-row">
+      <input type="number" id="searchInput" placeholder="e.g. 102" autofocus />
+      <button onclick="search()">Find</button>
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="error-msg" id="errorMsg">❌ No order found for that number</div>
+    <div id="resultCards"></div>
+  </div>
+
+  <div class="bottombar">
+    <div class="stat">
+      <span class="val" id="remaining-bottom">—</span>
+      <span class="lbl">Remaining</span>
+    </div>
+    <div class="stat">
+      <span class="val" id="collected-count">—</span>
+      <span class="lbl">Collected</span>
+    </div>
+    <div class="stat">
+      <span class="val" id="total-count">—</span>
+      <span class="lbl">Total</span>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') search();
+  });
+
+  async function search() {
+    const num = document.getElementById('searchInput').value.trim();
+    if (!num) return;
+
+    const errorMsg = document.getElementById('errorMsg');
+    const resultCards = document.getElementById('resultCards');
+    errorMsg.style.display = 'none';
+    resultCards.innerHTML = '';
+
+    try {
+      const res = await fetch(`/api/orders/search/${num}`);
+      if (!res.ok) { errorMsg.style.display = 'block'; return; }
+      const orders = await res.json();
+      renderCards(orders);
+    } catch {
+      errorMsg.style.display = 'block';
+    }
+  }
+
+  function renderCards(orders) {
+    const resultCards = document.getElementById('resultCards');
+    resultCards.innerHTML = orders.map((o, i) => `
+      <div class="order-card ${o.collected ? 'collected' : ''}" id="card-${i}">
+        <div>
+          <div class="order-num">#${o.orderNumber}</div>
+          <div class="order-item">${o.item}</div>
+        </div>
+        ${o.collected
+          ? `<span class="collected-tag">✓ Collected</span>`
+          : `<button class="collect-btn" onclick="collect('${o.orderNumber}','${o.itemJP}',${i})">Mark Collected</button>`
+        }
+      </div>
+    `).join('');
+  }
+
+  async function collect(orderNumber, itemJP, index) {
+    await fetch('/api/orders/collect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderNumber, itemJP })
+    });
+
+    const card = document.getElementById(`card-${index}`);
+    card.classList.add('collected');
+    card.querySelector('.collect-btn').outerHTML = `<span class="collected-tag">✓ Collected</span>`;
+
+    await loadSummary();
+
+    setTimeout(() => {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('resultCards').innerHTML = '';
+      document.getElementById('searchInput').focus();
+    }, 1500);
+  }
+
+  async function loadSummary() {
+    const res = await fetch('/api/summary');
+    const d = await res.json();
+    const collected = d.totalCustomers - d.remaining;
+    document.getElementById('remaining-top').textContent = d.remaining;
+    document.getElementById('remaining-bottom').textContent = d.remaining;
+    document.getElementById('collected-count').textContent = collected;
+    document.getElementById('total-count').textContent = d.totalCustomers;
+  }
+
+  loadSummary();
+  setInterval(loadSummary, 5000);
+</script>
+</body>
+</html>

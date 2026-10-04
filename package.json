@@ -1,0 +1,12 @@
+{
+  "name": "school-food-system",
+  "version": "1.0.0",
+  "description": "Simple ordering system: order page, kitchen page, TV display page",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

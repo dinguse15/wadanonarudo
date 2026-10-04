@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock View — Wadanonolds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #1e1e1e;
+    background: #111;
+  }
+  .topbar a { color: #555; text-decoration: none; font-size: 14px; }
+  .topbar a:hover { color: #f5a623; }
+  .topbar .title { font-size: 15px; font-weight: 700; }
+
+  /* ── Total strip ── */
+  .total-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 32px 24px 8px;
+    text-align: center;
+    flex-direction: column;
+  }
+  .total-strip .big {
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 1;
+    color: #f5a623;
+  }
+  .total-strip .sub {
+    font-size: 15px;
+    color: #555;
+    margin-top: 6px;
+  }
+
+  /* ── Item grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    padding: 30px 24px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .item-card {
+    background: #161616;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.2s;
+  }
+  .item-card:hover { border-color: #333; }
+
+  .item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .item-counts {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .item-remaining {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1;
+    color: #f5a623;
+  }
+  .item-remaining.zero { color: #2ecc71; }
+  .item-total {
+    font-size: 16px;
+    color: #444;
+  }
+
+  /* Progress bar */
+  .progress-track {
+    height: 4px;
+    background: #222;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #f5a623;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .progress-fill.zero { background: #2ecc71; }
+
+  .item-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+  }
+  .item-status.done { color: #2ecc71; }
+
+  /* ── All done banner ── */
+  #allDone {
+    display: none;
+    margin: 20px 24px 0;
+    background: #0d2414;
+    border: 1px solid #1a4a28;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    color: #2ecc71;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* refresh indicator */
+  .refresh {
+    text-align: center;
+    font-size: 12px;
+    color: #2a2a2a;
+    padding-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html">← Home</a>
+    <span class="title">Stock View</span>
+    <a href="kitchen.html">Kitchen →</a>
+  </div>
+
+  <div class="total-strip">
+    <div class="big" id="remainingBig">—</div>
+    <div class="sub">customers still to collect &nbsp;·&nbsp; <span id="totalSub">—</span> total orders</div>
+  </div>
+
+  <div id="allDone">🎉 All orders collected!</div>
+
+  <div class="grid" id="grid"></div>
+  <div class="refresh" id="refreshTime"></div>
+
+<script>
+  async function load() {
+    const res = await fetch('/api/summary');
+    const d = await res.json();
+
+    document.getElementById('remainingBig').textContent = d.remaining;
+    document.getElementById('totalSub').textContent = d.totalCustomers;
+
+    const allDone = document.getElementById('allDone');
+    allDone.style.display = d.remaining === 0 ? 'block' : 'none';
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = Object.entries(d.items)
+      .sort((a, b) => b[1].remaining - a[1].remaining)
+      .map(([name, counts]) => {
+        const pct = counts.total > 0 ? (counts.remaining / counts.total) * 100 : 0;
+        const done = counts.remaining === 0;
+        return `
+          <div class="item-card">
+            <div class="item-name">${name}</div>
+            <div class="item-counts">
+              <span class="item-remaining ${done ? 'zero' : ''}">${counts.remaining}</span>
+              <span class="item-total">/ ${counts.total}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill ${done ? 'zero' : ''}" style="width: ${pct}%"></div>
+            </div>
+            <div class="item-status ${done ? 'done' : ''}">
+              ${done ? '✓ All collected' : `${counts.total - counts.remaining} collected`}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    document.getElementById('refreshTime').textContent =
+      'Updated ' + new Date().toLocaleTimeString();
+  }
+
+  load();
+  setInterval(load, 4000);
+</script>
+</body>
+</html>

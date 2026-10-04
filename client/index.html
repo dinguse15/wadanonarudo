@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wadanonolds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: #f5a623;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 60px;
+  }
+
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .nav-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 28px 24px;
+    background: #161616;
+    border: 1px solid #222;
+    border-radius: 16px;
+    text-decoration: none;
+    color: white;
+    transition: border-color 0.2s, background 0.2s;
+    gap: 12px;
+  }
+
+  .nav-card:hover {
+    background: #1e1e1e;
+    border-color: #f5a623;
+  }
+
+  .nav-card .icon {
+    font-size: 28px;
+  }
+
+  .nav-card .label {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .nav-card .desc {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+  }
+
+  .nav-card.primary {
+    border-color: #f5a623;
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-card.primary .text { display: flex; flex-direction: column; gap: 6px; }
+  .nav-card.primary .label { font-size: 22px; }
+  .nav-card.primary .arrow { font-size: 24px; color: #f5a623; }
+
+  .status {
+    margin-top: 50px;
+    font-size: 13px;
+    color: #333;
+  }
+  .status span { color: #555; }
+</style>
+</head>
+<body>
+  <h1>Wadanonolds</h1>
+  <p class="subtitle">Food pickup management</p>
+
+  <nav class="nav-grid">
+    <a href="kitchen.html" class="nav-card primary">
+      <div class="text">
+        <span class="icon">👨‍🍳</span>
+        <span class="label">Kitchen Counter</span>
+        <span class="desc">Search order numbers and mark pickups as collected</span>
+      </div>
+      <span class="arrow">→</span>
+    </a>
+
+    <a href="stock.html" class="nav-card">
+      <span class="icon">📦</span>
+      <span class="label">Stock View</span>
+      <span class="desc">Remaining items per category</span>
+    </a>
+
+    <a href="admin.html" class="nav-card">
+      <span class="icon">📺</span>
+      <span class="label">TV Display</span>
+      <span class="desc">Big screen remaining counts</span>
+    </a>
+  </nav>
+
+  <p class="status">88 pre-orders loaded &nbsp;·&nbsp; <span id="remaining-count">Loading...</span> remaining</p>
+
+  <script>
+    fetch('/api/summary')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('remaining-count').textContent = d.remaining + ' remaining';
+      })
+      .catch(() => {
+        document.getElementById('remaining-count').textContent = 'server offline';
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Display — Wadanonolds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 36px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .brand {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+  }
+  .brand span { color: #f5a623; }
+
+  .big-remaining {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .big-remaining .num {
+    font-size: 64px;
+    font-weight: 900;
+    color: #f5a623;
+    line-height: 1;
+  }
+  .big-remaining .label {
+    font-size: 16px;
+    color: #555;
+  }
+
+  .clock {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* ── Item grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 20px 36px;
+    align-content: center;
+  }
+
+  .item-card {
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    border-radius: 20px;
+    padding: 28px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .item-card.done {
+    border-color: #1a3a24;
+    background: #0e1a12;
+  }
+
+  .item-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #666;
+  }
+
+  .item-nums {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .item-remaining {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    color: #f5a623;
+  }
+  .item-remaining.zero { color: #2ecc71; }
+  .item-of {
+    font-size: 22px;
+    color: #333;
+  }
+
+  .item-bar {
+    height: 3px;
+    background: #222;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .item-bar-fill {
+    height: 100%;
+    background: #f5a623;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .item-bar-fill.zero { background: #2ecc71; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 14px 36px;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-left {
+    font-size: 13px;
+    color: #2a2a2a;
+  }
+  .footer-right {
+    font-size: 13px;
+    color: #2a2a2a;
+  }
+
+  /* ── All done overlay ── */
+  #allDoneOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0d2414;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #allDoneOverlay.show { display: flex; }
+  #allDoneOverlay .emoji { font-size: 80px; }
+  #allDoneOverlay .msg {
+    font-size: 48px;
+    font-weight: 900;
+    color: #2ecc71;
+  }
+  #allDoneOverlay .sub { font-size: 20px; color: #555; }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">Wada<span>nonolds</span></div>
+    <div class="big-remaining">
+      <span class="num" id="headerRemaining">—</span>
+      <span class="label">left to collect</span>
+    </div>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <span class="footer-left">📺 TV Display — refreshes automatically</span>
+    <span class="footer-right" id="lastUpdate"></span>
+  </footer>
+
+  <div id="allDoneOverlay">
+    <div class="emoji">🎉</div>
+    <div class="msg">All orders collected!</div>
+    <div class="sub">Great work everyone</div>
+  </div>
+
+<script>
+  // Clock
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  async function load() {
+    const res = await fetch('/api/summary');
+    const d = await res.json();
+
+    document.getElementById('headerRemaining').textContent = d.remaining;
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = Object.entries(d.items)
+      .sort((a, b) => b[1].remaining - a[1].remaining)
+      .map(([name, counts]) => {
+        const pct = counts.total > 0 ? (counts.remaining / counts.total) * 100 : 0;
+        const done = counts.remaining === 0;
+        return `
+          <div class="item-card ${done ? 'done' : ''}">
+            <div class="item-name">${name}</div>
+            <div class="item-nums">
+              <span class="item-remaining ${done ? 'zero' : ''}">${counts.remaining}</span>
+              <span class="item-of">/ ${counts.total}</span>
+            </div>
+            <div class="item-bar">
+              <div class="item-bar-fill ${done ? 'zero' : ''}" style="width:${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    // All done overlay
+    const overlay = document.getElementById('allDoneOverlay');
+    overlay.classList.toggle('show', d.remaining === 0);
+
+    document.getElementById('lastUpdate').textContent =
+      'Last updated ' + new Date().toLocaleTimeString();
+  }
+
+  load();
+  setInterval(load, 3000);
+</script>
+</body>
+</html>

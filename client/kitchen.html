@@ -23,20 +23,27 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
+    padding: 14px 20px;
     border-bottom: 1px solid #1e1e1e;
     background: #111;
+    gap: 10px;
+    flex-wrap: wrap;
   }
   .topbar a {
     color: #555;
     text-decoration: none;
     font-size: 14px;
+    white-space: nowrap;
   }
   .topbar a:hover { color: #f5a623; }
   .topbar .title {
     font-size: 15px;
     font-weight: 700;
-    color: #fff;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   .badge {
     background: #1e1e1e;
@@ -45,12 +52,28 @@
     padding: 5px 14px;
     font-size: 13px;
     color: #aaa;
+    white-space: nowrap;
   }
   .badge strong { color: #f5a623; }
 
+  .reset-btn {
+    background: #1e0a0a;
+    color: #ff6b6b;
+    border: 1px solid #5a1a1a;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .reset-btn:hover { background: #2e0a0a; }
+
   /* ── Search section ── */
   .search-section {
-    padding: 40px 24px 20px;
+    padding: 32px 20px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -62,7 +85,7 @@
     color: #555;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .search-row {
@@ -74,7 +97,7 @@
 
   .search-row input {
     flex: 1;
-    padding: 18px 20px;
+    padding: 16px 20px;
     font-size: 28px;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
@@ -91,7 +114,7 @@
   .search-row input::placeholder { color: #333; font-weight: 400; font-size: 18px; }
 
   .search-row button {
-    padding: 18px 24px;
+    padding: 16px 24px;
     background: #f5a623;
     color: #000;
     font-size: 16px;
@@ -107,7 +130,7 @@
 
   /* ── Results ── */
   .results {
-    padding: 10px 24px 120px;
+    padding: 10px 20px 130px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -119,7 +142,7 @@
     background: #1e0a0a;
     border: 1px solid #5a1a1a;
     border-radius: 12px;
-    padding: 20px 28px;
+    padding: 18px 24px;
     font-size: 16px;
     color: #ff6b6b;
     text-align: center;
@@ -131,38 +154,45 @@
     background: #161616;
     border: 1px solid #2a2a2a;
     border-radius: 14px;
-    padding: 22px 24px;
+    padding: 20px 22px;
     width: 100%;
     max-width: 460px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     transition: border-color 0.2s;
   }
-  .order-card:hover { border-color: #333; }
   .order-card.collected {
-    opacity: 0.4;
+    opacity: 0.45;
     border-color: #1a2e1a;
   }
 
   .order-num {
-    font-size: 36px;
+    font-size: 34px;
     font-weight: 900;
     color: #f5a623;
     line-height: 1;
   }
   .order-item {
-    font-size: 16px;
+    font-size: 15px;
     color: #aaa;
     margin-top: 4px;
   }
 
+  .card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
   .collect-btn {
-    padding: 12px 22px;
+    padding: 11px 20px;
     background: #f5a623;
     color: #000;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
     border: none;
@@ -170,9 +200,23 @@
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s;
-    flex-shrink: 0;
   }
   .collect-btn:hover { background: #e09512; }
+
+  .undo-btn {
+    padding: 6px 14px;
+    background: transparent;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .undo-btn:hover { color: #ff6b6b; border-color: #5a1a1a; }
 
   .collected-tag {
     font-size: 14px;
@@ -181,13 +225,31 @@
     flex-shrink: 0;
   }
 
+  /* ── Toast notification ── */
+  #toast {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2e1e;
+    border: 1px solid #2ecc71;
+    color: #2ecc71;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
   /* ── Bottom bar ── */
   .bottombar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     background: #111;
     border-top: 1px solid #1e1e1e;
-    padding: 14px 24px;
+    padding: 12px 24px;
     display: flex;
     justify-content: center;
     gap: 40px;
@@ -211,6 +273,48 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
+
+  /* ── Reset confirm overlay ── */
+  #resetOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  #resetOverlay.show { display: flex; }
+  .reset-box {
+    background: #161616;
+    border: 1px solid #5a1a1a;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .reset-box .icon { font-size: 40px; }
+  .reset-box h2 { font-size: 22px; color: #ff6b6b; }
+  .reset-box p { font-size: 14px; color: #666; line-height: 1.5; }
+  .reset-box-btns { display: flex; gap: 10px; }
+  .reset-box-btns button {
+    flex: 1;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-cancel { background: #222; color: #aaa; }
+  .btn-cancel:hover { background: #2a2a2a; }
+  .btn-confirm { background: #ff6b6b; color: #000; }
+  .btn-confirm:hover { background: #e05555; }
 </style>
 </head>
 <body>
@@ -218,8 +322,13 @@
   <div class="topbar">
     <a href="index.html">← Home</a>
     <span class="title">Kitchen Counter</span>
-    <span class="badge">Remaining: <strong id="remaining-top">—</strong></span>
+    <div class="topbar-right">
+      <span class="badge">Left: <strong id="remaining-top">—</strong></span>
+      <button class="reset-btn" onclick="showReset()">⚠ Reset All</button>
+    </div>
   </div>
+
+  <div id="toast"></div>
 
   <div class="search-section">
     <div class="search-label">Enter order number</div>
@@ -249,7 +358,21 @@
     </div>
   </div>
 
+  <!-- Reset confirm overlay -->
+  <div id="resetOverlay">
+    <div class="reset-box">
+      <div class="icon">⚠️</div>
+      <h2>Reset All Orders?</h2>
+      <p>This will mark every order as uncollected and reset the count back to 88. This cannot be undone!</p>
+      <div class="reset-box-btns">
+        <button class="btn-cancel" onclick="hideReset()">Cancel</button>
+        <button class="btn-confirm" onclick="confirmReset()">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
 <script>
+  // ── Search ──
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') search();
   });
@@ -281,14 +404,20 @@
           <div class="order-num">#${o.orderNumber}</div>
           <div class="order-item">${o.item}</div>
         </div>
-        ${o.collected
-          ? `<span class="collected-tag">✓ Collected</span>`
-          : `<button class="collect-btn" onclick="collect('${o.orderNumber}','${o.itemJP}',${i})">Mark Collected</button>`
-        }
+        <div class="card-actions">
+          ${o.collected
+            ? `
+              <span class="collected-tag">✓ Collected</span>
+              <button class="undo-btn" onclick="undo('${o.orderNumber}','${o.itemJP}',${i})">Undo</button>
+            `
+            : `<button class="collect-btn" onclick="collect('${o.orderNumber}','${o.itemJP}',${i})">Mark Collected</button>`
+          }
+        </div>
       </div>
     `).join('');
   }
 
+  // ── Collect ──
   async function collect(orderNumber, itemJP, index) {
     await fetch('/api/orders/collect', {
       method: 'POST',
@@ -298,17 +427,65 @@
 
     const card = document.getElementById(`card-${index}`);
     card.classList.add('collected');
-    card.querySelector('.collect-btn').outerHTML = `<span class="collected-tag">✓ Collected</span>`;
+    card.querySelector('.card-actions').innerHTML = `
+      <span class="collected-tag">✓ Collected</span>
+      <button class="undo-btn" onclick="undo('${orderNumber}','${itemJP}',${index})">Undo</button>
+    `;
 
+    showToast('✓ Order #' + orderNumber + ' collected!');
     await loadSummary();
 
     setTimeout(() => {
       document.getElementById('searchInput').value = '';
       document.getElementById('resultCards').innerHTML = '';
       document.getElementById('searchInput').focus();
-    }, 1500);
+    }, 1800);
   }
 
+  // ── Undo single order ──
+  async function undo(orderNumber, itemJP, index) {
+    await fetch('/api/orders/uncollect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderNumber, itemJP })
+    });
+
+    const card = document.getElementById(`card-${index}`);
+    card.classList.remove('collected');
+    card.querySelector('.card-actions').innerHTML = `
+      <button class="collect-btn" onclick="collect('${orderNumber}','${itemJP}',${index})">Mark Collected</button>
+    `;
+
+    showToast('↩ Order #' + orderNumber + ' undone');
+    await loadSummary();
+  }
+
+  // ── Reset all ──
+  function showReset() {
+    document.getElementById('resetOverlay').classList.add('show');
+  }
+  function hideReset() {
+    document.getElementById('resetOverlay').classList.remove('show');
+  }
+  async function confirmReset() {
+    await fetch('/api/reset', { method: 'POST' });
+    hideReset();
+    document.getElementById('searchInput').value = '';
+    document.getElementById('resultCards').innerHTML = '';
+    document.getElementById('errorMsg').style.display = 'none';
+    await loadSummary();
+    showToast('✓ All orders have been reset!');
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+  }
+
+  // ── Summary ──
   async function loadSummary() {
     const res = await fetch('/api/summary');
     const d = await res.json();

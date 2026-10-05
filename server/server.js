@@ -24,7 +24,7 @@ const ITEM_LABELS = {
 
 function loadCSV() {
   const raw = fs.readFileSync(CSV_FILE, 'utf-8');
-  const lines = raw.split('\n').slice(1); // skip header
+  const lines = raw.split('\n').slice(1);
   const orders = [];
 
   for (const line of lines) {
@@ -44,7 +44,6 @@ function loadCSV() {
   return orders;
 }
 
-// Load state (who has collected) from state.json
 function loadState() {
   if (!fs.existsSync(STATE_FILE)) return {};
   return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
@@ -54,7 +53,6 @@ function saveState(state) {
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-// Merge CSV orders with saved state
 function getOrders() {
   const orders = loadCSV();
   const state = loadState();
@@ -66,24 +64,17 @@ function getOrders() {
 
 // ---------- API Routes ----------
 
-// Get all orders (with collected status)
 app.get('/api/orders', (req, res) => {
-  const orders = getOrders();
-  res.json(orders);
+  res.json(getOrders());
 });
 
-// Search by order number
 app.get('/api/orders/search/:num', (req, res) => {
   const num = req.params.num.trim();
-  const orders = getOrders();
-  const matches = orders.filter((o) => o.orderNumber === num);
-  if (matches.length === 0) {
-    return res.status(404).json({ error: 'Order not found' });
-  }
+  const matches = getOrders().filter((o) => o.orderNumber === num);
+  if (matches.length === 0) return res.status(404).json({ error: 'Order not found' });
   res.json(matches);
 });
 
-// Mark order as collected
 app.post('/api/orders/collect', (req, res) => {
   const { orderNumber, itemJP } = req.body;
   const state = loadState();
@@ -92,29 +83,42 @@ app.post('/api/orders/collect', (req, res) => {
   res.json({ success: true });
 });
 
-// Get summary: remaining counts per item
+// Undo a single collected order
+app.post('/api/orders/uncollect', (req, res) => {
+  const { orderNumber, itemJP } = req.body;
+  const state = loadState();
+  delete state[orderNumber + '_' + itemJP];
+  saveState(state);
+  res.json({ success: true });
+});
+
+// Reset ALL collected orders
+app.post('/api/reset', (req, res) => {
+  saveState({});
+  res.json({ success: true });
+});
+
 app.get('/api/summary', (req, res) => {
   const orders = getOrders();
   const summary = {};
 
   for (const o of orders) {
-    const label = o.item;
-    if (!summary[label]) {
-      summary[label] = { total: 0, remaining: 0 };
-    }
-    summary[label].total++;
-    if (!o.collected) summary[label].remaining++;
+    if (!summary[o.item]) summary[o.item] = { total: 0, remaining: 0 };
+    summary[o.item].total++;
+    if (!o.collected) summary[o.item].remaining++;
   }
 
-  const totalCustomers = orders.length;
-  const remaining = orders.filter((o) => !o.collected).length;
-
-  res.json({ totalCustomers, remaining, items: summary });
+  res.json({
+    totalCustomers: orders.length,
+    remaining: orders.filter((o) => !o.collected).length,
+    items: summary,
+  });
 });
 
 // ---------- Start ----------
 app.listen(PORT, () => {
   console.log(`Server running!`);
-  console.log(`  Kitchen: http://localhost:${PORT}/kitchen.html`);
+  console.log(`  Kitchen:    http://localhost:${PORT}/kitchen.html`);
+  console.log(`  Stock:      http://localhost:${PORT}/stock.html`);
   console.log(`  TV Display: http://localhost:${PORT}/admin.html`);
 });
